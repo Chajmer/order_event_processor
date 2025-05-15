@@ -11,9 +11,6 @@
 # vscode project organizer
 *.sln
 
-# c# config
-*.csproj
-
 # folders
 **/bin/
 **/obj/
