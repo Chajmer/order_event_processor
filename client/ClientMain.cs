@@ -7,7 +7,7 @@ class Program
 {
     static void Main(string[] args)
     {
-        var factory = new ConnectionFactory() { HostName = "localhost" };
+        var factory = new ConnectionFactory() { HostName = "localhost" }; // todo make hostname scalable 
 
         using var connection = factory.CreateConnection();
         using var channel = connection.CreateModel();
@@ -27,7 +27,7 @@ class Program
         {
             var order = new
             {
-                id = "O-123",
+                id = "O-99",
                 product = "PR-ABC",
                 total = 12.34,
                 currency = "USD"
