@@ -1,12 +1,12 @@
 exec info -> demo
 
->REQUIREMENTS
-For starters project is using: docker / docker-compose, RabbitMQ, Postgress database, .Net 8.0.
-TODO datailed requirements.
-RabbitMQ and Postgress seems to be automatically get as an image to docker.
+REQUIREMENTS:
+- For starters project is using: docker / docker-compose, RabbitMQ, Postgress database, .Net 8.0.
+- TODO datailed requirements.
+- RabbitMQ and Postgress seems to be automatically get as an image to docker.
 
->COMMANDS
-// CLEAR running/paused dockers -> run if config containers fails
+COMMANDS:
+- CLEAR running/paused dockers -> run if config containers fails
 docker-compose down
 
 - server start in server/ folder
