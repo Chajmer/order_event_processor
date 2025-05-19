@@ -19,8 +19,9 @@ psql -h localhost -U user -d order_db<br/>
 // initially is needed paste there init.sql file from server/
 
 - client start in client/ folder<br/>
-docker build -t my-client .<br/>
-docker run --rm -it --network host -e RABBITMQ_HOST=localhost my-client
+dotnet add package DotNetEnv<br/>
+docker build<br/>
+docker run
 
 - RabbitMQ could be checked on http://localhost:15672/<br/>
 login / password is guest / guest
