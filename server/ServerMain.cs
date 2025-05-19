@@ -11,45 +11,14 @@ class Program
     {
         Console.WriteLine("Starting Order Event Processor...");
 
-        // Get config from ENV or defaults
-        string rabbitHost = Environment.GetEnvironmentVariable("RABBITMQ_HOST") ?? "localhost";
-        string pgHost = Environment.GetEnvironmentVariable("POSTGRES_HOST") ?? "localhost";
-        string pgUser = Environment.GetEnvironmentVariable("POSTGRES_USER") ?? "user";
-        string pgPass = Environment.GetEnvironmentVariable("POSTGRES_PASSWORD") ?? "password";
-        string pgDb   = Environment.GetEnvironmentVariable("POSTGRES_DB") ?? "order_db";
-
-        string pgConnectionString = $"Host={pgHost};Username={pgUser};Password={pgPass};Database={pgDb}";
-
         // Connect to database
-        using var conn = new NpgsqlConnection(pgConnectionString);
+        var config = Config.Instance;
+        using var conn = new NpgsqlConnection(config.GetPostgresConnectionString());
         conn.Open();
 
         // RabbitMQ setup
-        var factory = new ConnectionFactory() { HostName = rabbitHost };
-        IConnection connection = null;
-        for (int i = 0; i < 10; i++)
-        {
-            try
-            {
-                connection = factory.CreateConnection();
-                break;
-            }
-            catch
-            {
-                Console.WriteLine("Waiting for RabbitMQ...");
-                System.Threading.Thread.Sleep(3000);
-            }
-        }
-
-        if (connection == null)
-        {
-            Console.WriteLine("Cannot connect to RabbitMQ, exiting.");
-            return;
-        }
-        using var channel = connection.CreateModel();
-
-        string queueName = "order_events";
-        channel.QueueDeclare(queue: queueName, durable: true, exclusive: false, autoDelete: false);
+        var (connection, channel, queueName) = SetupRabbitMq(config);
+        if (connection == null) return;
 
         var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
 
@@ -61,7 +30,7 @@ class Program
             var message = Encoding.UTF8.GetString(body);
             var msgTypeStr = Encoding.UTF8.GetString((byte[])ea.BasicProperties.Headers["X-MsgType"]);
 
-            Console.WriteLine($"\n[x] Received message of type: {msgTypeStr}");
+            Console.WriteLine($"\n[_] Received message of type: {msgTypeStr}");
 
             try
             {
@@ -105,6 +74,39 @@ class Program
         channel.BasicConsume(queue: queueName, autoAck: true, consumer: consumer);
         Console.WriteLine("Waiting for messages. Press [enter] to exit.");
         System.Threading.Tasks.Task.Delay(-1).Wait();
+    }
+
+    static (IConnection connection, IModel channel, string queueName) SetupRabbitMq(Config config)
+    {
+        var factory = new ConnectionFactory { HostName = config.GetRabbitMqHost() };
+
+        IConnection connection = null;
+        for (int i = 0; i < 10; i++)
+        {
+            try
+            {
+                connection = factory.CreateConnection();
+                break;
+            }
+            catch
+            {
+                Console.WriteLine("Waiting for RabbitMQ...");
+                System.Threading.Thread.Sleep(3000);
+            }
+        }
+
+        if (connection == null)
+        {
+            Console.WriteLine("Cannot connect to RabbitMQ, exiting.");
+            return (null, null, null);
+        }
+    
+        using var channel = connection.CreateModel();
+
+        string queueName = config.GetEventQueueName();
+        channel.QueueDeclare(queue: queueName, durable: true, exclusive: false, autoDelete: false);
+
+        return (connection, channel, queueName);
     }
 
     static void CheckAndPrintPaymentStatus(NpgsqlConnection conn, string orderId)
