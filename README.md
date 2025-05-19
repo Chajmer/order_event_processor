@@ -1,9 +1,7 @@
-exec info -> demo
+exec info
 
 REQUIREMENTS:
-- For starters project is using: docker / docker-compose, RabbitMQ, Postgress database, .Net 8.0.
-- TODO datailed requirements.
-- RabbitMQ and Postgress seems to be automatically get as an image to docker.
+- project is using: docker / docker-compose, RabbitMQ, Postgress database, .Net 8.0.
 
 COMMANDS:
 - CLEAR running/paused dockers -> run if config containers fails<br/>
@@ -19,8 +17,9 @@ psql -h localhost -U user -d order_db<br/>
 // initially is needed paste there init.sql file from server/
 
 - client start in client/ folder<br/>
-docker build -t my-client .<br/>
-docker run --rm -it --network host -e RABBITMQ_HOST=localhost my-client
+dotnet add package DotNetEnv<br/>
+docker build<br/>
+docker run
 
 - RabbitMQ could be checked on http://localhost:15672/<br/>
 login / password is guest / guest

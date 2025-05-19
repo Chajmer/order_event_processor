@@ -18,4 +18,5 @@
 
 # all starting with '.', except .gitignore
 .*
+!.env
 !.gitignore

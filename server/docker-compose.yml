@@ -25,6 +25,7 @@ services:
       - postgres
     environment:
       RABBITMQ_HOST: rabbitmq
+      EVENT_QUEUE_NAME: order_events
       POSTGRES_HOST: postgres
       POSTGRES_USER: user
       POSTGRES_PASSWORD: password
